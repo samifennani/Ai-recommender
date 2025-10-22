@@ -1,21 +1,21 @@
 import streamlit as st
 import pandas as pd
+import streamlit.components.v1 as components
 
-# Load database
-df = pd.read_csv('products.csv')
+st.set_page_config(page_title="Future Luxe AI Recommender", layout="wide")
 
-# Convert price column to numeric
+# Load products
+df = pd.read_csv("products.csv")
 df['price'] = pd.to_numeric(df['price'], errors='coerce')
 
-# App title
-st.title("AI Luxury Product Recommender")
+st.title("Future Luxe AI Product Explorer")
 
-# User input
+# Sidebar - customer preferences
 st.sidebar.header("Customer Preferences")
 gender = st.sidebar.selectbox("Gender", ["Male", "Female", "Other"])
 product_type = st.sidebar.selectbox("Product Type", df['type'].unique())
 color = st.sidebar.selectbox("Preferred Color", df['color'].unique())
-budget = st.sidebar.slider("Budget (USD)", min_value=500, max_value=15000, step=500)
+budget = st.sidebar.slider("Budget (USD)", 500, 15000, 500)
 
 # Filter products
 filtered = df[
@@ -24,7 +24,6 @@ filtered = df[
     (df['price'] <= budget)
 ]
 
-# Display recommendations
 st.header("Recommended Products")
 if not filtered.empty:
     for idx, row in filtered.iterrows():
@@ -32,5 +31,12 @@ if not filtered.empty:
         st.image(row['image_url'], width=150)
         st.write(f"Price: ${row['price']}")
         st.write(row['description'])
+        # Embed 3D model
+        model_html = f"""
+        <model-viewer src="{row['model_3d']}" alt="{row['name']}" 
+        auto-rotate camera-controls background-color="#FFFFFF" style="width: 100%; height: 400px;">
+        </model-viewer>
+        """
+        components.html(model_html, height=450)
 else:
     st.write("No products match your preferences. Try adjusting your filters.")
